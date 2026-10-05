@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="수업용 HTML 실습 편집기" />
+    <title>HTML 실습실</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%231b4d3e'/%3E%3Cpath d='M25 18 11 32l14 14M39 18l14 14-14 14M35 13 28 51' fill='none' stroke='%23f7f4ed' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <style>
+      :root { color-scheme: light; --ink: #17201e; --muted: #60706b; --line: #d8dfda; --paper: #fffefa; --canvas: #edf1ed; --green: #1b4d3e; --green-dark: #10392d; --accent: #e8a23b; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; color: var(--ink); background: var(--canvas); font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; }
+      button { font: inherit; }
+      .app { min-height: 100vh; padding: clamp(16px, 3vw, 36px); }
+      .topbar { max-width: 1600px; margin: 0 auto 18px; display: flex; gap: 18px; align-items: center; justify-content: space-between; }
+      .brand { display: flex; align-items: center; gap: 12px; }
+      .mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--green); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1.12rem; font-weight: 800; box-shadow: 0 5px 15px #1b4d3e30; }
+      h1 { margin: 0; font-size: clamp(1.15rem, 2.2vw, 1.45rem); letter-spacing: -0.04em; }
+      .hint { margin: 2px 0 0; color: var(--muted); font-size: .86rem; }
+      .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+      button { min-height: 38px; padding: 0 13px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: var(--paper); cursor: pointer; font-size: .88rem; font-weight: 650; transition: transform .15s, background .15s, border-color .15s; }
+      button:hover { transform: translateY(-1px); border-color: #9bada6; background: #fff; }
+      button:focus-visible { outline: 3px solid #e8a23b88; outline-offset: 2px; }
+      .run { border-color: var(--green); color: white; background: var(--green); }
+      .run:hover { background: var(--green-dark); border-color: var(--green-dark); }
+      .workspace { max-width: 1600px; min-height: min(74vh, 760px); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: 0 16px 45px #25483b12; }
+      .panel { display: flex; min-width: 0; flex-direction: column; }
+      .panel + .panel { border-left: 1px solid var(--line); }
+      .panel-header { min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); background: #fafbf8; }
+      .panel-title { margin: 0; font-size: .88rem; font-weight: 800; }
+      .status { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: .78rem; }
+      .status::before { width: 8px; height: 8px; border-radius: 50%; background: #43a36f; content: ""; }
+      #editor { width: 100%; min-height: 620px; flex: 1; resize: none; border: 0; padding: 20px; color: #24312d; background: #f8faf7; font: 14px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 2; }
+      #editor:focus { outline: inset 3px solid #1b4d3e22; }
+      #preview { width: 100%; min-height: 620px; flex: 1; border: 0; background: white; }
+      .footer { max-width: 1600px; margin: 13px auto 0; display: flex; justify-content: space-between; gap: 14px; color: var(--muted); font-size: .78rem; }
+      kbd { padding: 2px 5px; border: 1px solid #cbd4cf; border-bottom-width: 2px; border-radius: 4px; background: white; color: #41504a; font-family: inherit; }
+      @media (max-width: 760px) { .app { padding: 14px; } .topbar { align-items: flex-start; flex-direction: column; } .actions { justify-content: flex-start; } .workspace { min-height: 0; grid-template-columns: 1fr; } .panel + .panel { border-top: 1px solid var(--line); border-left: 0; } #editor, #preview { min-height: 46vh; } .footer { align-items: flex-start; flex-direction: column; } }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark">&lt;/&gt;</div>
+          <div><h1>HTML 실습실</h1><p class="hint">코드를 쓰고 바로 결과를 확인하세요.</p></div>
+        </div>
+        <nav class="actions" aria-label="편집기 도구">
+          <button type="button" id="sample">예제 불러오기</button>
+          <button type="button" id="copy">코드 복사</button>
+          <button type="button" id="download">HTML 다운로드</button>
+          <button class="run" type="button" id="run">실행하기</button>
+        </nav>
+      </header>
+
+      <section class="workspace" aria-label="HTML 편집기">
+        <section class="panel" aria-label="코드 입력 영역">
+          <div class="panel-header"><h2 class="panel-title">HTML 코드</h2><span class="status">자동 저장</span></div>
+          <textarea id="editor" aria-label="HTML 코드 입력" spellcheck="false"></textarea>
+        </section>
+        <section class="panel" aria-label="실행 결과">
+          <div class="panel-header"><h2 class="panel-title">미리보기</h2><span class="status">실행 중</span></div>
+          <iframe id="preview" title="HTML 실행 결과" sandbox="allow-scripts allow-modals"></iframe>
+        </section>
+      </section>
+      <footer class="footer"><span>수업용 HTML 실습 도구</span><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 로 실행</span></footer>
+    </main>
+
+    <script>
+      const starter = `<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>나의 첫 웹페이지</title>
+    <style>
+      body { font-family: sans-serif; padding: 2rem; color: #1b4d3e; }
+      h1 { color: #e08a16; }
+    </style>
+  </head>
+  <body>
+    <h1>안녕하세요!</h1>
+    <p>HTML로 만든 첫 번째 웹페이지입니다.</p>
+  </body>
+</html>`;
+      const editor = document.querySelector('#editor');
+      const preview = document.querySelector('#preview');
+      const storageKey = 'html-classroom-code';
+      editor.value = localStorage.getItem(storageKey) || starter;
+
+      function render() { preview.srcdoc = editor.value; }
+      function save() { localStorage.setItem(storageKey, editor.value); }
+      let timer;
+      editor.addEventListener('input', () => { save(); clearTimeout(timer); timer = setTimeout(render, 350); });
+      editor.addEventListener('keydown', (event) => {
+        if (event.key === 'Tab') { event.preventDefault(); const start = editor.selectionStart; editor.setRangeText('  ', start, editor.selectionEnd, 'end'); editor.dispatchEvent(new Event('input')); }
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') render();
+      });
+      document.querySelector('#run').addEventListener('click', render);
+      document.querySelector('#sample').addEventListener('click', () => { editor.value = starter; save(); render(); editor.focus(); });
+      document.querySelector('#copy').addEventListener('click', async () => {
+        await navigator.clipboard.writeText(editor.value);
+        const button = document.querySelector('#copy'); const original = button.textContent; button.textContent = '복사 완료'; setTimeout(() => button.textContent = original, 1400);
+      });
+      document.querySelector('#download').addEventListener('click', () => {
+        const file = new Blob([editor.value], { type: 'text/html;charset=utf-8' });
+        const link = Object.assign(document.createElement('a'), { href: URL.createObjectURL(file), download: 'my-page.html' });
+        link.click(); URL.revokeObjectURL(link.href);
+      });
+      render();
+    </script>
+  </body>
+</html>
